@@ -1,0 +1,181 @@
+{
+ "generated": "2026-10-07T19:41:59.232Z",
+ "sites": {
+  "municipal": "https://datajose-radar-municipal.static.hf.space",
+  "obras": "https://datajose-radar-de-obras.static.hf.space",
+  "presupuesto": "https://datajose-alertas-ejecucion-presupuestaria.static.hf.space",
+  "conflictos": "https://datajose-conflictos.static.hf.space"
+ },
+ "items": [
+  {
+   "app": "conflictos",
+   "kind": "datos",
+   "date": "2026-10-07",
+   "title": "2.223 casos para revisar: organismos que le compran a sus propios funcionarios",
+   "summary": "En 421 organismos hay compras por $375 mil millones a sus funcionarios, a sus familias o a empresas ligadas a ellos, hechas mientras estaban en el cargo. Son casos para revisar, no infracciones probadas.",
+   "note": "Cruce de 71.029 funcionarios y 373.751 proveedores",
+   "url": "https://datajose-conflictos.static.hf.space/#/casos"
+  },
+  {
+   "app": "municipal",
+   "kind": "prensa",
+   "date": "2026-10-06",
+   "place": "Linares",
+   "title": "Fiscalía acusa a alcalde de Linares y otras 14 personas por fraude al fisco tras compras irregulares en pandemia",
+   "summary": "Caso Cloro: la Fiscalía de Linares acusó al alcalde, dos exadministradores municipales y otras personas por fraude al fisco, imputando compras directas de insumos sanitarios durante la pandemia (cloro, test rápidos, mascarillas…",
+   "note": "acusado (2026-10-06) audiencia de preparación de juicio oral fijada para 2026-11-03…",
+   "url": "https://datajose-radar-municipal.static.hf.space/#/comuna/7401"
+  },
+  {
+   "app": "presupuesto",
+   "kind": "hallazgo",
+   "date": "2026-10-06",
+   "title": "Alerta temprana",
+   "summary": "Con los datos de agosto, un modelo predictivo anticipa qué ítems terminarán el año sin gastar al menos 10% de su presupuesto. Probado en 2025 sin conocer ese año, acertó en 40 de los 50 ítems que marcó (al azar habrían sido 17)…",
+   "note": "Análisis con datos a agosto de 2026",
+   "url": "https://datajose-alertas-ejecucion-presupuestaria.static.hf.space/#/2026"
+  },
+  {
+   "app": "obras",
+   "kind": "alerta",
+   "date": "2026-10-05",
+   "place": "Illapel",
+   "severity": 3,
+   "title": "Obra contratada por trato directo sobre 100 UTM",
+   "summary": "La OC 3512-885-TD26 «Orden de Compra generada por Trato Directo ID 3512-102-FTD26» (05-10-2026) contrató por trato directo a Juan Francisco (RUT 76925539-7) por $91.162.181 (1.263 UTM). Causal invocada: «Emergencia, urgencia o…",
+   "note": "Datos al 2026-10-07",
+   "url": "https://datajose-radar-de-obras.static.hf.space/#c4201"
+  },
+  {
+   "app": "conflictos",
+   "kind": "hallazgo",
+   "date": "2026-10-07",
+   "title": "Vende el propio funcionario: 1.545 casos en 328 organismos",
+   "summary": "El funcionario, como persona natural, le vende a su propio organismo mientras está en el cargo.",
+   "note": "Monto involucrado: $15 mil millones",
+   "url": "https://datajose-conflictos.static.hf.space/#/casos"
+  },
+  {
+   "app": "municipal",
+   "kind": "prensa",
+   "date": "2026-10-06",
+   "place": "Chillán",
+   "title": "Caso Led: tribunal fijó audiencia de juicio oral para este 30 de octubre",
+   "summary": "En la arista Chillán del Caso Luminarias LED, la Fiscalía acusa al exadministrador municipal Ricardo Vallejos (cohecho, pide 8 años) y al exconcejal Víctor Sepúlveda (cohecho agravado, pide 10 años) por presuntos sobornos de…",
+   "note": "acusado (2026-10) juicio oral fijado para 2026-10-30",
+   "url": "https://datajose-radar-municipal.static.hf.space/#/comuna/16101"
+  },
+  {
+   "app": "presupuesto",
+   "kind": "hallazgo",
+   "date": "2026-10-06",
+   "title": "Inversión que no alcanza a ejecutarse",
+   "summary": "Cuando el presupuesto para obras e inversión de un programa crece, su gasto efectivo crece bastante menos: por cada 10% de aumento, la ejecución sube cerca de 5% (capacidad de absorción limitada). En 2026, 58 programas tienen un…",
+   "note": "Análisis con datos a agosto de 2026",
+   "url": "https://datajose-alertas-ejecucion-presupuestaria.static.hf.space/#/2026"
+  },
+  {
+   "app": "obras",
+   "kind": "alerta",
+   "date": "2026-10-02",
+   "place": "Mostazal",
+   "severity": 3,
+   "title": "Obra adjudicada con un solo oferente",
+   "summary": "La licitación 2675-81-LP26 «CONSTRUCCIÓN CIERRE PERIMETRAL INVERNADERO Y OTROS EDIFICIO ANEXO LA PUNTA MOSTAZAL» (LP, publicada el 20-07-2026, presupuesto $165.000.000) recibió una sola oferta, de INGENIERÍA Y CONSTRUCCIÓN…",
+   "note": "Datos al 2026-10-07",
+   "url": "https://datajose-radar-de-obras.static.hf.space/#c6110"
+  },
+  {
+   "app": "conflictos",
+   "kind": "hallazgo",
+   "date": "2026-10-07",
+   "title": "Empresa propia o de la familia: 585 casos en 251 organismos",
+   "summary": "El funcionario o su familia participa, controla o dirige una empresa que le vende a su organismo mientras está en el cargo.",
+   "note": "Monto involucrado: $356 mil millones",
+   "url": "https://datajose-conflictos.static.hf.space/#/casos"
+  },
+  {
+   "app": "municipal",
+   "kind": "prensa",
+   "date": "2026-10-06",
+   "place": "Negrete",
+   "title": "Caso Led: tribunal fijó audiencia de juicio oral para este 30 de octubre",
+   "summary": "En la arista Negrete del Caso Luminarias LED, un intermediario fue condenado en procedimiento abreviado por ofrecer dinero de socios de Itelecom al exalcalde Francisco Melo y al exsecretario de planificación para favorecer a la…",
+   "note": "acusado (2026-10) juicio oral fijado para 2026-10-30; intermediario condenado (2024-04)",
+   "url": "https://datajose-radar-municipal.static.hf.space/#/comuna/8307"
+  },
+  {
+   "app": "presupuesto",
+   "kind": "hallazgo",
+   "date": "2026-10-06",
+   "title": "El dinero cambia de destino durante el año",
+   "summary": "El total gastado se parece mucho al que aprobó el Congreso (nota A en la metodología internacional PEFA), pero su distribución cambia más: nota B entre ministerios y A entre tipos de gasto. Donde más se reparte distinto el dinero…",
+   "note": "Análisis con datos a agosto de 2026",
+   "url": "https://datajose-alertas-ejecucion-presupuestaria.static.hf.space/#/2026"
+  },
+  {
+   "app": "obras",
+   "kind": "alerta",
+   "date": "2026-10-01",
+   "place": "Coquimbo",
+   "severity": 3,
+   "title": "Obra adjudicada a una oferta más cara que la más baja admisible",
+   "summary": "La licitación 2446-237-LP26 «MUSEO DE ARTE URBANO COQUIMBO ETAPA III» (LP, publicada el 14-08-2026, presupuesto $95.000.000) se adjudicó a FACTOR MURAL SPA (RUT 78268407-8) por $93.635.374 neto, 31% más que la oferta admisible más…",
+   "note": "Datos al 2026-10-07",
+   "url": "https://datajose-radar-de-obras.static.hf.space/#c4102"
+  },
+  {
+   "app": "municipal",
+   "kind": "alerta",
+   "date": "2026-10-02",
+   "place": "Arica",
+   "severity": 3,
+   "title": "Hallazgo en consolidado de cruces de Contraloría (CIC)",
+   "summary": "Contraloría, CIC 26/2026 (02-10-2026) — Licencias médicas y salidas del país 2025. La municipalidad figura en el cruce: licencias médicas asociadas a salidas del país durante el reposo, 2023: 355 licencias médicas (entidad…",
+   "note": "Contraloría General de la República – Consolidado de Información Circularizada",
+   "url": "https://datajose-radar-municipal.static.hf.space/#/comuna/15101"
+  },
+  {
+   "app": "presupuesto",
+   "kind": "datos",
+   "date": "2026-09-22",
+   "title": "DIPRES publicó la ejecución presupuestaria a agosto de 2026",
+   "summary": "El centro de alertas se actualizó con los datos oficiales de agosto: ejecución por ministerio, servicio y programa, y las alertas recalculadas.",
+   "note": "Dirección de Presupuestos (DIPRES), datos abiertos en datos.gob.cl",
+   "url": "https://datajose-alertas-ejecucion-presupuestaria.static.hf.space/#/2026"
+  },
+  {
+   "app": "obras",
+   "kind": "alerta",
+   "date": "2026-10-01",
+   "place": "Isla de Pascua",
+   "severity": 3,
+   "title": "Obra contratada por trato directo sobre 100 UTM",
+   "summary": "La OC 4044-702-TD26 «Orden de Compra generada por Trato Directo ID 4044-118-FTD26» (01-10-2026) contrató por trato directo a Fahneu ltda. (RUT 80335400-6) por $381.662.000 (5.290 UTM). Causal invocada: «Contratacion de proveedor…",
+   "note": "Datos al 2026-10-07",
+   "url": "https://datajose-radar-de-obras.static.hf.space/#c5201"
+  },
+  {
+   "app": "municipal",
+   "kind": "alerta",
+   "date": "2026-09-25",
+   "place": "Concepción",
+   "severity": 3,
+   "title": "Trato directo de alto monto (≥1.000 UTM)",
+   "summary": "OC 2671-20-TD26 (25-09-2026) por trato directo de $2.337.198.765 (32.587 UTM) a DISEÑOS, SERVICIOS Y CONSTRUCCIONES HIDROSYM LTDA (RUT 88650400-4). Causal invocada: «Emergencia, urgencia o imprevisto». Objeto: «Orden de Compra…",
+   "note": "Mercado Público – orden de compra (ChileCompra, datos abiertos)",
+   "url": "https://datajose-radar-municipal.static.hf.space/#/comuna/8101"
+  },
+  {
+   "app": "municipal",
+   "kind": "alerta",
+   "date": "2026-09-23",
+   "place": "Río Bueno",
+   "severity": 3,
+   "title": "Proveedor de reciente creación con contratos relevantes",
+   "summary": "SOCIEDAD DE SERVICIOS LOS ROBLES SPA (RUT 78457879-8) inició actividades/se constituyó el 30-06-2026 y recibió su primera OC de este municipio 85 días después (23-09-2026); en los 12 meses siguientes acumuló 1 OC por $370.798.536…",
+   "note": "SII Nómina de personas jurídicas / Registro de Empresas y Sociedades + Mercado Público",
+   "url": "https://datajose-radar-municipal.static.hf.space/#/comuna/14204"
+  }
+ ]
+}
