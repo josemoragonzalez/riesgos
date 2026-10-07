@@ -4,458 +4,535 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jose Mora · Datos Públicos</title>
-<meta name="description" content="Cuatro herramientas para fiscalizar el uso de recursos públicos en Chile. Hechas por Jose Mora.">
+<meta name="description" content="Cuatro herramientas abiertas para seguir el dinero público en Chile. Por Jose Mora.">
 <meta property="og:title" content="Jose Mora · Datos Públicos">
 <meta property="og:description" content="Conflictos, Alertas presupuestarias, Radar Municipal y Radar de Obras.">
-<meta name="theme-color" content="#06060a">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%2306060a'/><circle cx='16' cy='16' r='9' fill='none' stroke='%23a78bfa' stroke-width='2.5'/><circle cx='16' cy='16' r='3' fill='%2322d3ee'/></svg>">
+<meta property="og:image" content="img/radar-municipal.webp">
+<meta name="theme-color" content="#07070b">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%2307070b'/><circle cx='16' cy='16' r='8' fill='none' stroke='%23c4b5fd' stroke-width='2.5'/><circle cx='16' cy='16' r='2.5' fill='%2367e8f9'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #06060a;
-    --fg: #f4f4f7;
-    --muted: #8a8a99;
-    --line: rgba(255,255,255,.08);
-    --card: rgba(255,255,255,.025);
-    --violet: #a78bfa;
-    --red: #fb7185;
-    --cyan: #22d3ee;
-    --amber: #fbbf24;
-    --sans: "Inter Tight", system-ui, sans-serif;
+    --bg: #07070b;
+    --fg: #f2f1ee;
+    --dim: #8b8a93;
+    --line: rgba(242,241,238,.1);
+    --violet: #c4b5fd;
+    --coral: #fb7185;
+    --cyan: #67e8f9;
+    --amber: #fcd34d;
+    --accent: var(--violet);
+    --sans: "Instrument Sans", system-ui, sans-serif;
     --serif: "Instrument Serif", Georgia, serif;
-    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --mono: "Geist Mono", ui-monospace, monospace;
+    --ease: cubic-bezier(.16,1,.3,1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { -webkit-font-smoothing: antialiased; }
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--sans); overflow-x: hidden; }
   a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--violet); color: var(--bg); }
 
-  /* ---------- background ---------- */
-  .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-  .blob {
-    position: absolute; border-radius: 50%; filter: blur(110px); opacity: .45;
-    animation: drift 22s ease-in-out infinite alternate;
+  /* ================= shader background ================= */
+  #gl {
+    position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0;
+    background: radial-gradient(80% 60% at 30% 20%, #241645, transparent 60%),
+                radial-gradient(60% 50% at 80% 40%, #0b3440, transparent 60%), var(--bg);
   }
-  .blob.b1 { width: 55vw; height: 55vw; background: #6d28d9; top: -20vw; left: -10vw; }
-  .blob.b2 { width: 45vw; height: 45vw; background: #0e7490; top: 10vh; right: -15vw; animation-delay: -6s; }
-  .blob.b3 { width: 40vw; height: 40vw; background: #9f1239; bottom: -20vw; left: 25vw; opacity: .3; animation-delay: -12s; }
-  @keyframes drift {
-    0%   { transform: translate(0,0) scale(1); }
-    50%  { transform: translate(6vw,4vh) scale(1.12); }
-    100% { transform: translate(-4vw,8vh) scale(.95); }
+  .veil {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, rgba(7,7,11,.35) 45%, rgba(7,7,11,.92) 100%);
   }
-  .grid-bg {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
-    opacity: .6;
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
-  .grain {
-    position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: .06;
-    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-    animation: grain 1s steps(4) infinite;
-  }
-  @keyframes grain { 0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)} 50%{transform:translate(2%,-3%)} 75%{transform:translate(-1%,3%)} }
-  .cursor-glow {
-    position: fixed; width: 600px; height: 600px; border-radius: 50%; z-index: 0; pointer-events: none;
-    background: radial-gradient(circle, rgba(167,139,250,.14), transparent 60%);
-    transform: translate(-50%,-50%); left: 50%; top: 30%;
-    transition: opacity .3s;
-  }
+  main, footer { position: relative; z-index: 3; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 48px); }
 
-  /* ---------- layout ---------- */
-  .wrap { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+  /* ================= nav ================= */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; transition: background .5s, backdrop-filter .5s, border-color .5s; border-bottom: 1px solid transparent; }
+  nav.solid { background: rgba(7,7,11,.6); backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); border-color: var(--line); }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; height: 76px; transition: height .5s var(--ease); }
+  nav.solid .wrap { height: 60px; }
+  .brand { font-family: var(--mono); font-size: 13px; letter-spacing: .02em; display: flex; gap: 10px; align-items: center; color: #fff; }
+  .brand i { width: 8px; height: 8px; border-radius: 50%; background: #fff; display: inline-block; animation: breathe 2.4s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(.55); opacity: .5; } }
+  .nav-r { display: flex; gap: 28px; font-family: var(--mono); font-size: 13px; color: #fff; }
+  .nav-r a { position: relative; }
+  .nav-r a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .5s var(--ease); }
+  .nav-r a:hover::after { transform: scaleX(1); transform-origin: left; }
+  #clock { font-variant-numeric: tabular-nums; }
 
-  nav {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 28px 0;
+  /* ================= hero ================= */
+  .hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: clamp(28px, 6vh, 64px); }
+  .hero-inner { will-change: transform, opacity; }
+  .kicker {
+    font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .16em; color: #c8c7cc;
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: clamp(20px, 3vh, 32px);
+    padding: 7px 14px 7px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: rgba(7,7,11,.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; }
-  .logo-mark {
-    width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
-    background: conic-gradient(from 180deg, var(--violet), var(--cyan), var(--red), var(--amber), var(--violet));
-    font-family: var(--mono); font-size: 13px; color: #06060a; font-weight: 700;
+  .kicker b { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
+  h1 { font-weight: 500; font-size: clamp(46px, 8.6vw, 136px); line-height: .95; letter-spacing: -.045em; max-width: 11.5ch; }
+  h1 em { font-family: var(--serif); font-weight: 400; font-style: italic; letter-spacing: -.02em; color: var(--violet); }
+  h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
+  h1 .w > span {
+    display: inline-block; transform: translateY(105%) rotate(4deg); filter: blur(8px); opacity: 0;
+    animation: wordIn 1.3s var(--ease) forwards; animation-delay: calc(var(--i) * 70ms + 200ms);
   }
-  .status {
-    display: flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 12px; color: var(--muted);
-    padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px;
-    background: rgba(255,255,255,.02); backdrop-filter: blur(10px);
+  @keyframes wordIn { to { transform: none; filter: none; opacity: 1; } }
+  .hero-foot {
+    margin-top: clamp(28px, 5vh, 56px); padding-top: 22px; border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 1.2fr 1fr auto; gap: 32px; align-items: end;
+    opacity: 0; animation: fadeUp 1.2s var(--ease) 1s forwards;
   }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 0 rgba(52,211,153,.6); animation: ping 2s infinite; }
-  @keyframes ping { 70% { box-shadow: 0 0 0 9px rgba(52,211,153,0); } 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .hero-foot p { font-size: clamp(16px, 1.35vw, 19px); line-height: 1.5; color: #c8c7cc; max-width: 44ch; }
+  .hero-foot .meta { font-family: var(--mono); font-size: 12px; color: var(--dim); line-height: 1.8; }
+  .down {
+    width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center;
+    background: rgba(7,7,11,.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: background .4s, color .4s, transform .4s var(--ease);
+  }
+  .down:hover { background: var(--fg); color: var(--bg); transform: scale(1.06); }
+  .down svg { animation: nudge 2s var(--ease) infinite; }
+  @keyframes nudge { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(4px); } }
 
-  header.hero { padding: 9vh 0 7vh; }
-  .eyebrow {
-    font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
-    color: var(--muted); display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+  /* ================= index ================= */
+  .index { padding: clamp(80px, 14vh, 160px) 0 60px; }
+  .index-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    font-family: var(--mono); font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .14em;
+    padding-bottom: 18px;
   }
-  .eyebrow::before { content: ""; width: 36px; height: 1px; background: var(--muted); }
-  h1 {
-    font-size: clamp(48px, 9.5vw, 148px);
-    line-height: .9; letter-spacing: -.055em; font-weight: 700;
-    text-wrap: balance;
+  .rows { list-style: none; border-top: 1px solid var(--line); }
+  .row { border-bottom: 1px solid var(--line); position: relative; }
+  .row a {
+    position: relative; display: grid; grid-template-columns: 72px 1fr minmax(220px, 320px) 56px;
+    align-items: center; gap: 24px; padding: clamp(26px, 4vh, 44px) 0; overflow: hidden; isolation: isolate;
+    transition: opacity .5s;
   }
-  h1 em {
-    font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.02em;
-    background: linear-gradient(100deg, var(--violet) 0%, var(--cyan) 35%, var(--amber) 65%, var(--red) 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: shine 8s linear infinite;
-    padding-right: .08em;
+  .row a::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+    transform: scaleY(0); transform-origin: bottom; transition: transform .7s var(--ease);
   }
-  @keyframes shine { to { background-position: 200% center; } }
-  .hero-sub {
-    margin-top: 36px; display: flex; justify-content: space-between; align-items: end; gap: 32px; flex-wrap: wrap;
+  .row a:hover::before, .row a:focus-visible::before { transform: scaleY(1); }
+  .row a:focus-visible { outline: none; }
+  .r-num { font-family: var(--mono); font-size: 13px; color: var(--dim); transition: color .4s; }
+  .r-title {
+    position: relative; display: inline-block; justify-self: start; font-size: clamp(38px, 5.4vw, 80px); line-height: 1; letter-spacing: -.045em; font-weight: 500;
+    transition: transform .8s var(--ease);
   }
-  .hero-sub p { max-width: 480px; font-size: 18px; line-height: 1.55; color: #b5b5c3; }
-  .hero-sub p strong { color: var(--fg); font-weight: 600; }
-  .scroll-hint { font-family: var(--mono); font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
-  .scroll-hint span { display: inline-block; animation: bob 1.8s ease-in-out infinite; }
-  @keyframes bob { 50% { transform: translateY(5px); } }
-
-  /* ---------- marquee ---------- */
-  .marquee {
-    position: relative; z-index: 2; border-block: 1px solid var(--line); overflow: hidden;
-    padding: 18px 0; background: rgba(255,255,255,.015);
-    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  .r-title em { font-family: var(--serif); font-weight: 400; letter-spacing: -.02em; }
+  .r-title .fill { position: absolute; inset: 0; color: var(--accent); pointer-events: none; clip-path: inset(0 100% 0 0); transition: clip-path .9s var(--ease); }
+  .row a:hover .r-title, .row a:focus-visible .r-title { transform: translateX(18px); }
+  .row a:hover .r-title .fill, .row a:focus-visible .r-title .fill { clip-path: inset(0 0 0 0); }
+  .row a:hover .r-num { color: var(--accent); }
+  .r-side { display: flex; flex-direction: column; gap: 10px; }
+  .r-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .r-tags span {
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+    padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim);
+    transition: color .4s, border-color .4s;
   }
-  .track { display: flex; gap: 48px; width: max-content; animation: scroll 40s linear infinite; }
-  .track span { font-family: var(--mono); font-size: 13px; color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 48px; }
-  .track span::after { content: "✦"; color: #3a3a48; }
-  @keyframes scroll { to { transform: translateX(-50%); } }
-
-  /* ---------- cards ---------- */
-  section.apps { padding: 80px 0 40px; }
-  .section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
-  .section-head h2 { font-size: 15px; font-weight: 500; color: var(--muted); font-family: var(--mono); letter-spacing: .04em; }
-  .section-head h2 b { color: var(--fg); font-weight: 500; }
-
-  .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-  .card {
-    --accent: var(--violet);
-    --mx: 50%; --my: 50%;
-    position: relative; grid-column: span 3; min-height: 380px;
-    border-radius: 28px; padding: 32px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    overflow: hidden; isolation: isolate;
-    display: flex; flex-direction: column; justify-content: space-between;
-    transition: transform .5s cubic-bezier(.2,.8,.2,1), border-color .4s;
-    transform-style: preserve-3d;
-    opacity: 0; translate: 0 40px;
+  .row a:hover .r-tags span { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .r-desc { font-size: 15px; line-height: 1.5; color: #a9a8b0; }
+  .r-go {
+    width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; position: relative;
+    transition: background .5s var(--ease), border-color .5s, color .5s;
   }
-  .card.in { opacity: 1; translate: 0 0; transition: opacity .9s ease, translate .9s cubic-bezier(.2,.8,.2,1), transform .5s cubic-bezier(.2,.8,.2,1), border-color .4s; }
-  .card.wide { grid-column: span 4; }
-  .card.narrow { grid-column: span 2; }
-  .card::before {
-    content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .4s;
-    background: radial-gradient(520px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 22%, transparent), transparent 45%);
-  }
-  .card::after {
-    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
-    background: radial-gradient(380px circle at var(--mx) var(--my), var(--accent), transparent 50%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    opacity: 0; transition: opacity .4s;
-  }
-  .card:hover::before, .card:hover::after { opacity: 1; }
-  .card:hover { border-color: transparent; }
-  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-
-  .c-top { display: flex; justify-content: space-between; align-items: start; }
-  .idx { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .1em; }
-  .tag {
-    font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
-    padding: 6px 11px; border-radius: 999px;
-    color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  .r-go svg { grid-area: 1 / 1; transition: transform .6s var(--ease); }
+  .r-go svg + svg { transform: translate(-150%, 150%); }
+  .row a:hover .r-go { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .row a:hover .r-go svg:first-child { transform: translate(150%, -150%); }
+  .row a:hover .r-go svg + svg { transform: none; }
+  .r-shot { display: none; }
+  @media (hover: hover) {
+    .rows:has(a:hover) a:not(:hover) { opacity: .35; }
   }
 
-  .visual {
-    position: absolute; right: -20px; top: 50%; translate: 0 -55%;
-    width: 300px; height: 300px; z-index: -1; opacity: .9;
-    transition: transform .8s cubic-bezier(.2,.8,.2,1);
+  /* floating preview that trails the cursor */
+  .preview {
+    position: fixed; left: 0; top: 0; z-index: 15; pointer-events: none;
+    width: clamp(320px, 30vw, 460px); aspect-ratio: 16 / 10;
+    border-radius: 14px; overflow: hidden; background: #111;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08);
+    clip-path: inset(50% 50% 50% 50% round 14px);
+    transition: clip-path .7s var(--ease);
+    will-change: transform;
   }
-  .card.narrow .visual { width: 200px; height: 200px; right: -50px; top: auto; bottom: 40px; translate: 0 0; opacity: .4; }
-  .card:hover .visual { transform: scale(1.08) rotate(-4deg); }
-
-  .c-body h3 {
-    font-size: clamp(30px, 3.6vw, 46px); line-height: 1; letter-spacing: -.04em; font-weight: 700;
-    max-width: 14ch;
+  .preview.on { clip-path: inset(0 0 0 0 round 14px); }
+  .preview img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left;
+    transform: translateY(120%) scale(1.15); transition: transform .9s var(--ease);
   }
-  .c-body h3 i { font-family: var(--serif); font-weight: 400; color: var(--accent); }
-  .c-body p { margin-top: 14px; color: #a3a3b2; font-size: 15.5px; line-height: 1.5; max-width: 38ch; }
-
-  .c-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
-  .url { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .go {
-    flex-shrink: 0; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
-    border: 1px solid var(--line); background: rgba(255,255,255,.03);
-    transition: all .45s cubic-bezier(.2,.8,.2,1);
+  .preview img.cur { transform: none; }
+  .preview img.prev { transform: translateY(-120%) scale(1.15); }
+  .preview .chip {
+    position: absolute; right: 12px; bottom: 12px; z-index: 2;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    padding: 7px 11px; border-radius: 999px; background: var(--accent); color: var(--bg);
   }
-  .go svg { transition: transform .45s cubic-bezier(.2,.8,.2,1); }
-  .card:hover .go { background: var(--accent); border-color: var(--accent); color: #06060a; transform: scale(1.08); }
-  .card:hover .go svg { transform: rotate(45deg); }
 
-  .card.violet { --accent: var(--violet); }
-  .card.red    { --accent: var(--red); }
-  .card.cyan   { --accent: var(--cyan); }
-  .card.amber  { --accent: var(--amber); }
+  /* ================= numbers ================= */
+  .numbers { padding: clamp(70px, 12vh, 140px) 0; }
+  .numbers h2 { font-weight: 500; font-size: clamp(30px, 4vw, 56px); line-height: 1.05; letter-spacing: -.035em; max-width: 18ch; margin-bottom: clamp(40px, 7vh, 72px); }
+  .numbers h2 em { font-family: var(--serif); font-weight: 400; color: var(--cyan); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+  .stat { background: rgba(7,7,11,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: clamp(22px, 2.5vw, 34px); position: relative; overflow: hidden; }
+  .stat::after { content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--c); transform: scaleX(0); transform-origin: left; transition: transform 1.6s var(--ease) .2s; }
+  .stat.seen::after { transform: scaleX(1); }
+  .stat .v { font-size: clamp(36px, 4.2vw, 62px); font-weight: 500; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .v small { font-size: .5em; color: var(--dim); margin-left: 4px; letter-spacing: 0; }
+  .stat .l { margin-top: 14px; font-size: 14px; color: var(--dim); line-height: 1.45; }
+  .stat .src { margin-top: 18px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--c); }
 
-  /* svg animations */
-  .pulse-node { animation: pnode 3s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-  @keyframes pnode { 50% { transform: scale(1.35); opacity: .6; } }
-  .flow { stroke-dasharray: 4 6; animation: flow 1.6s linear infinite; }
-  @keyframes flow { to { stroke-dashoffset: -20; } }
-  .sweep { transform-origin: 110px 110px; animation: spin 4s linear infinite; }
+  /* ================= footer ================= */
+  footer { border-top: 1px solid var(--line); background: rgba(7,7,11,.9); }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 28px; padding-bottom: 28px; flex-wrap: wrap; }
+  .made { font-size: 15px; color: var(--dim); display: flex; align-items: center; gap: 12px; }
+  .made strong { color: var(--fg); font-weight: 500; }
+  .av {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; color: var(--bg); font-weight: 500;
+    background: conic-gradient(from 210deg, var(--violet), var(--cyan), var(--amber), var(--coral), var(--violet));
+    animation: spin 8s linear infinite;
+  }
+  .av span { animation: spin 8s linear infinite reverse; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .blip { animation: blip 4s ease-in-out infinite; }
-  @keyframes blip { 0%,100% { opacity: 0; } 10%,40% { opacity: 1; } }
-  .ekg { stroke-dasharray: 600; stroke-dashoffset: 600; animation: ekg 3s ease-in-out infinite; }
-  @keyframes ekg { 60% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -600; } }
-  .rise { animation: rise 2.4s cubic-bezier(.2,.8,.2,1) infinite alternate; transform-box: fill-box; transform-origin: bottom; }
-  @keyframes rise { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
-  .hook { animation: hook 3s ease-in-out infinite alternate; }
-  @keyframes hook { to { transform: translateY(26px); } }
+  .f-links { display: flex; gap: 24px; font-family: var(--mono); font-size: 13px; color: var(--dim); }
+  .f-links a { transition: color .3s; }
+  .f-links a:hover { color: var(--fg); }
 
-  /* ---------- footer ---------- */
-  footer { position: relative; z-index: 2; padding: 90px 0 48px; }
-  .sig {
-    display: flex; justify-content: space-between; align-items: end; gap: 32px; flex-wrap: wrap;
-    border-top: 1px solid var(--line); padding-top: 40px;
+  /* ================= page wipe on navigate ================= */
+  .wipe {
+    position: fixed; inset: 0; z-index: 50; pointer-events: none; visibility: hidden;
+    background: var(--accent); clip-path: circle(0 at var(--x, 50%) var(--y, 50%));
+    display: grid; place-items: center;
   }
-  .sig-big { font-size: clamp(40px, 7vw, 96px); line-height: .95; letter-spacing: -.05em; font-weight: 700; }
-  .sig-big em { font-family: var(--serif); font-weight: 400; color: var(--muted); }
-  .sig-big .name {
-    background: linear-gradient(100deg, var(--fg), var(--violet) 60%, var(--cyan));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .sig-meta { font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 2; text-align: right; }
-  .sig-meta a { color: var(--fg); border-bottom: 1px solid var(--line); transition: border-color .3s; }
-  .sig-meta a:hover { border-color: var(--violet); }
+  .wipe.go { visibility: visible; transition: clip-path .8s cubic-bezier(.7,0,.2,1); clip-path: circle(150vmax at var(--x, 50%) var(--y, 50%)); pointer-events: auto; }
+  .wipe span { font-size: clamp(40px, 8vw, 120px); letter-spacing: -.045em; color: var(--bg); font-weight: 500; text-align: center; padding: 0 16px; opacity: 0; transform: translateY(30px); transition: opacity .6s var(--ease) .35s, transform .6s var(--ease) .35s; }
+  .wipe.go span { opacity: 1; transform: none; }
 
-  /* ---------- responsive ---------- */
-  @media (max-width: 900px) {
-    .card, .card.wide, .card.narrow { grid-column: span 6; min-height: 340px; }
-    .card.narrow .visual { width: 260px; height: 260px; opacity: .55; }
-    .visual { opacity: .55; }
+  /* ================= scroll-driven ================= */
+  @supports (animation-timeline: view()) {
+    .hero-inner { animation: heroOut linear both; animation-timeline: scroll(root); animation-range: 0 90vh; }
+    @keyframes heroOut { to { transform: translateY(-12vh) scale(.94); opacity: 0; filter: blur(6px); } }
+    .row, .stat, .numbers h2, .index-head { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+    @keyframes rise { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: none; } }
+  }
+
+  /* ================= responsive ================= */
+  @media (max-width: 960px) {
+    .row a { grid-template-columns: 40px 1fr 48px; gap: 14px 16px; }
+    .r-side { grid-column: 2 / 4; grid-row: 2; }
+    .r-go { grid-column: 3; grid-row: 1; width: 48px; height: 48px; }
+    .r-shot { display: block; grid-column: 1 / 4; grid-row: 3; width: 100%; aspect-ratio: 16/10; object-fit: cover; object-position: top left; border-radius: 12px; border: 1px solid var(--line); }
+    .preview { display: none; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hero-foot { grid-template-columns: 1fr auto; }
+    .hero-foot .meta { display: none; }
+    .index-head .hint { display: none; }
   }
   @media (max-width: 560px) {
-    .wrap { padding: 0 16px; }
-    .card { padding: 24px; border-radius: 22px; min-height: 320px; }
-    .visual, .card.narrow .visual { width: 200px; height: 200px; right: -50px; opacity: .4; }
-    .status .txt-long { display: none; }
-    .sig-meta { text-align: left; }
-    header.hero { padding-top: 6vh; }
+    .nav-r .hide-sm { display: none; }
+    .row a { grid-template-columns: 1fr 44px; gap: 12px; }
+    .r-num { grid-column: 1; grid-row: 1; }
+    .r-title { grid-column: 1; grid-row: 2; }
+    .r-go { grid-column: 2; grid-row: 1 / 3; align-self: end; width: 44px; height: 44px; }
+    .r-side { grid-column: 1 / 3; grid-row: 3; }
+    .r-shot { grid-column: 1 / 3; grid-row: 4; }
+    .stats { grid-template-columns: 1fr; }
+    .down { width: 52px; height: 52px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
-    .card { opacity: 1; translate: 0 0; }
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+    h1 .w > span, .hero-foot { opacity: 1; transform: none; filter: none; }
   }
 </style>
 </head>
 <body>
 
-<div class="aurora" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-<div class="grid-bg" aria-hidden="true"></div>
-<div class="cursor-glow" aria-hidden="true"></div>
-<div class="grain" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
 
-<div class="wrap">
-  <nav>
-    <a class="logo" href="https://huggingface.co/datajose" target="_blank" rel="noopener">
-      <span class="logo-mark">JM</span> Jose Mora
-    </a>
-    <div class="status"><span class="dot"></span> 4 apps <span class="txt-long">en línea</span></div>
-  </nav>
-
-  <header class="hero">
-    <div class="eyebrow">Fiscalización ciudadana · Chile</div>
-    <h1>Datos públicos,<br><em>bajo la lupa.</em></h1>
-    <div class="hero-sub">
-      <p>Cuatro herramientas abiertas para seguir el dinero del Estado: <strong>quién es dueño de quién</strong>, cómo se ejecuta el presupuesto, cuánto gastan los municipios y dónde se construye.</p>
-      <div class="scroll-hint">Explorar <span>↓</span></div>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><i></i> Jose Mora</a>
+    <div class="nav-r">
+      <a href="#indice">Índice (4)</a>
+      <a class="hide-sm" href="https://huggingface.co/datajose" target="_blank" rel="noopener">Hugging Face</a>
+      <span class="hide-sm">Santiago <span id="clock">--:--</span></span>
     </div>
-  </header>
-</div>
-
-<div class="marquee" aria-hidden="true">
-  <div class="track">
-    <span>3,4 M personas jurídicas</span><span>345 municipios</span><span>Presupuesto de la Nación</span><span>Obras públicas</span><span>Mallas societarias</span><span>Beneficiarios finales</span><span>Alertas automáticas</span><span>Datos abiertos</span>
-    <span>3,4 M personas jurídicas</span><span>345 municipios</span><span>Presupuesto de la Nación</span><span>Obras públicas</span><span>Mallas societarias</span><span>Beneficiarios finales</span><span>Alertas automáticas</span><span>Datos abiertos</span>
   </div>
-</div>
+</nav>
 
-<div class="wrap">
-  <section class="apps" id="apps">
-    <div class="section-head">
-      <h2><b>/ Proyectos</b> — elige uno para entrar</h2>
-      <h2>alojados en Hugging Face Spaces</h2>
-    </div>
-
-    <div class="bento">
-
-      <!-- 01 Conflictos -->
-      <a class="card violet wide" href="https://datajose-conflictos.static.hf.space" target="_blank" rel="noopener">
-        <svg class="visual" viewBox="0 0 220 220" fill="none" aria-hidden="true">
-          <g stroke="#a78bfa" stroke-opacity=".5" stroke-width="1.2">
-            <path class="flow" d="M110 110 L50 55 M110 110 L175 60 M110 110 L180 150 M110 110 L60 170 M110 110 L110 30 M50 55 L110 30 M175 60 L110 30 M180 150 L130 195 M60 170 L130 195 M50 55 L25 115 M25 115 L60 170"/>
-          </g>
-          <circle cx="110" cy="110" r="16" fill="#a78bfa" class="pulse-node"/>
-          <circle cx="110" cy="110" r="28" stroke="#a78bfa" stroke-opacity=".35"/>
-          <g fill="#06060a" stroke="#a78bfa" stroke-width="2">
-            <circle cx="50" cy="55" r="8"/><circle cx="175" cy="60" r="10"/><circle cx="180" cy="150" r="7"/>
-            <circle cx="60" cy="170" r="9"/><circle cx="110" cy="30" r="6"/><circle cx="130" cy="195" r="6"/><circle cx="25" cy="115" r="5"/>
-          </g>
-          <circle cx="175" cy="60" r="4" fill="#22d3ee" class="pulse-node"/>
-        </svg>
-        <div class="c-top"><span class="idx">01</span><span class="tag">Sociedades</span></div>
-        <div class="c-body">
-          <h3>Conflictos <i>de interés</i></h3>
-          <p>Mallas societarias de 3,4 millones de personas jurídicas: quién es dueño de quién, beneficiarios finales y vínculos con el Estado.</p>
-        </div>
-        <div class="c-foot">
-          <span class="url">datajose/conflictos</span>
-          <span class="go"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
-        </div>
-      </a>
-
-      <!-- 02 Alertas presupuestarias -->
-      <a class="card red narrow" href="https://datajose-alertas-ejecucion-presupuestaria.static.hf.space" target="_blank" rel="noopener">
-        <svg class="visual" viewBox="0 0 220 220" fill="none" aria-hidden="true">
-          <circle cx="110" cy="110" r="90" stroke="#fb7185" stroke-opacity=".15"/>
-          <circle cx="110" cy="110" r="60" stroke="#fb7185" stroke-opacity=".25"/>
-          <path class="ekg" d="M10 120 H70 L85 120 L95 70 L108 165 L120 95 L130 120 H210" stroke="#fb7185" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="c-top"><span class="idx">02</span><span class="tag">Presupuesto</span></div>
-        <div class="c-body">
-          <h3>Alertas <i>presupuestarias</i></h3>
-          <p>Centro de alertas para fiscalizar la ejecución del presupuesto de Chile.</p>
-        </div>
-        <div class="c-foot">
-          <span class="url">alertas-ejecucion-presupuestaria</span>
-          <span class="go"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
-        </div>
-      </a>
-
-      <!-- 03 Radar Municipal -->
-      <a class="card cyan narrow" href="https://datajose-radar-municipal.static.hf.space" target="_blank" rel="noopener">
-        <svg class="visual" viewBox="0 0 220 220" fill="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="sw" x1="110" y1="110" x2="200" y2="110" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#22d3ee" stop-opacity=".55"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <g stroke="#22d3ee" stroke-opacity=".3">
-            <circle cx="110" cy="110" r="95"/><circle cx="110" cy="110" r="65"/><circle cx="110" cy="110" r="35"/>
-            <path d="M15 110h190M110 15v190"/>
-          </g>
-          <path class="sweep" d="M110 110 L205 110 A95 95 0 0 0 177 43 Z" fill="url(#sw)"/>
-          <circle class="blip" cx="160" cy="70" r="5" fill="#22d3ee"/>
-          <circle class="blip" style="animation-delay:-1.4s" cx="70" cy="150" r="4" fill="#22d3ee"/>
-          <circle class="blip" style="animation-delay:-2.6s" cx="60" cy="75" r="3.5" fill="#fbbf24"/>
-          <circle cx="110" cy="110" r="4" fill="#22d3ee"/>
-        </svg>
-        <div class="c-top"><span class="idx">03</span><span class="tag">Municipios</span></div>
-        <div class="c-body">
-          <h3>Radar <i>Municipal</i></h3>
-          <p>Alertas de gasto en los 345 municipios de Chile.</p>
-        </div>
-        <div class="c-foot">
-          <span class="url">datajose/radar-municipal</span>
-          <span class="go"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
-        </div>
-      </a>
-
-      <!-- 04 Radar de Obras -->
-      <a class="card amber wide" href="https://datajose-radar-de-obras.static.hf.space" target="_blank" rel="noopener">
-        <svg class="visual" viewBox="0 0 220 220" fill="none" aria-hidden="true">
-          <g stroke="#fbbf24" stroke-width="2" stroke-linecap="round">
-            <path d="M40 200 V30 H190 M40 30 L75 60 M40 30 L20 45 H40" stroke-opacity=".8"/>
-            <path d="M40 60 L75 30 M40 90 L75 60 M40 120 L75 90 M40 150 L75 120" stroke-opacity=".35"/>
-            <g class="hook"><path d="M160 30 V95" stroke-opacity=".6"/><path d="M152 95 H168 V108" /></g>
-          </g>
-          <g fill="#fbbf24">
-            <rect class="rise" x="95" y="140" width="26" height="60" rx="3" fill-opacity=".85"/>
-            <rect class="rise" style="animation-delay:-.8s" x="127" y="120" width="26" height="80" rx="3" fill-opacity=".55"/>
-            <rect class="rise" style="animation-delay:-1.6s" x="159" y="155" width="26" height="45" rx="3" fill-opacity=".3"/>
-          </g>
-          <path d="M15 200 H210" stroke="#fbbf24" stroke-opacity=".4"/>
-        </svg>
-        <div class="c-top"><span class="idx">04</span><span class="tag">Infraestructura</span></div>
-        <div class="c-body">
-          <h3>Radar <i>de Obras</i></h3>
-          <p>Alertas en obras públicas municipales de Chile.</p>
-        </div>
-        <div class="c-foot">
-          <span class="url">datajose/radar-de-obras</span>
-          <span class="go"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
-        </div>
-      </a>
-
+<main id="top">
+  <section class="hero wrap">
+    <div class="hero-inner">
+      <div class="kicker"><b></b> Fiscalización ciudadana · Chile</div>
+      <h1 id="title">Seguir el dinero <em>público,</em> con datos <em>abiertos.</em></h1>
+      <div class="hero-foot">
+        <p>Cuatro herramientas que cruzan registros oficiales para mostrar quién es dueño de quién, cómo se ejecuta el presupuesto y dónde conviene mirar primero.</p>
+        <div class="meta">Proyectos independientes<br>Alojados en Hugging Face Spaces</div>
+        <a class="down" href="#indice" aria-label="Ver proyectos">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg>
+        </a>
+      </div>
     </div>
   </section>
-</div>
+
+  <section class="index" id="indice">
+    <div class="wrap">
+      <div class="index-head"><span>Índice de proyectos</span><span class="hint">Haz clic para entrar</span></div>
+      <ul class="rows">
+        <li class="row" style="--accent: var(--violet)">
+          <a href="https://datajose-conflictos.static.hf.space" data-img="0" data-name="Conflictos">
+            <span class="r-num">01</span>
+            <span class="r-title">Conflictos<span class="fill" aria-hidden="true">Conflictos</span></span>
+            <span class="r-side">
+              <span class="r-tags"><span>Sociedades</span><span>Grafo</span></span>
+              <span class="r-desc">Quién es dueño de quién entre 3,4 millones de personas jurídicas, y sus vínculos con el Estado.</span>
+            </span>
+            <span class="r-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+            <img class="r-shot" src="img/conflictos.svg" alt="Vista previa de Conflictos" loading="lazy">
+          </a>
+        </li>
+        <li class="row" style="--accent: var(--coral)">
+          <a href="https://datajose-alertas-ejecucion-presupuestaria.static.hf.space" data-img="1" data-name="Alertas presupuestarias">
+            <span class="r-num">02</span>
+            <span class="r-title">Alertas <em>presupuestarias</em><span class="fill" aria-hidden="true">Alertas <em>presupuestarias</em></span></span>
+            <span class="r-side">
+              <span class="r-tags"><span>Presupuesto</span><span>DIPRES</span></span>
+              <span class="r-desc">Centro de alertas para fiscalizar la ejecución del presupuesto de Chile.</span>
+            </span>
+            <span class="r-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+            <img class="r-shot" src="img/alertas-ejecucion-presupuestaria.webp" alt="Vista previa de Alertas presupuestarias" loading="lazy">
+          </a>
+        </li>
+        <li class="row" style="--accent: var(--cyan)">
+          <a href="https://datajose-radar-municipal.static.hf.space" data-img="2" data-name="Radar Municipal">
+            <span class="r-num">03</span>
+            <span class="r-title">Radar <em>Municipal</em><span class="fill" aria-hidden="true">Radar <em>Municipal</em></span></span>
+            <span class="r-side">
+              <span class="r-tags"><span>Municipios</span><span>Compras</span></span>
+              <span class="r-desc">Alertas de gasto en los 345 municipios de Chile, cada comuna comparada con sus pares.</span>
+            </span>
+            <span class="r-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+            <img class="r-shot" src="img/radar-municipal.webp" alt="Vista previa de Radar Municipal" loading="lazy">
+          </a>
+        </li>
+        <li class="row" style="--accent: var(--amber)">
+          <a href="https://datajose-radar-de-obras.static.hf.space" data-img="3" data-name="Radar de Obras">
+            <span class="r-num">04</span>
+            <span class="r-title">Radar <em>de Obras</em><span class="fill" aria-hidden="true">Radar <em>de Obras</em></span></span>
+            <span class="r-side">
+              <span class="r-tags"><span>Obras</span><span>Licitaciones</span></span>
+              <span class="r-desc">Alertas en obras públicas municipales: dónde conviene fiscalizar primero.</span>
+            </span>
+            <span class="r-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+            <img class="r-shot" src="img/radar-de-obras.webp" alt="Vista previa de Radar de Obras" loading="lazy">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="numbers">
+    <div class="wrap">
+      <h2>Millones de registros públicos, <em>listos para leer.</em></h2>
+      <div class="stats">
+        <div class="stat" style="--c: var(--violet)"><div class="v" data-to="3.4" data-dec="1">0<small>M</small></div><div class="l">personas jurídicas con su malla societaria</div><div class="src">Conflictos</div></div>
+        <div class="stat" style="--c: var(--coral)"><div class="v" data-to="345">0</div><div class="l">municipalidades analizadas, una por una</div><div class="src">Radar Municipal</div></div>
+        <div class="stat" style="--c: var(--cyan)"><div class="v" data-to="3.1" data-dec="1">0<small>M</small></div><div class="l">órdenes de compra municipales revisadas (2022–2026)</div><div class="src">Radar Municipal</div></div>
+        <div class="stat" style="--c: var(--amber)"><div class="v" data-to="32868">0</div><div class="l">licitaciones de obras municipales cruzadas</div><div class="src">Radar de Obras</div></div>
+      </div>
+    </div>
+  </section>
+</main>
 
 <footer>
   <div class="wrap">
-    <div class="sig">
-      <div class="sig-big"><em>Hecho por</em><br><span class="name">Jose Mora.</span></div>
-      <div class="sig-meta">
-        Diseño, datos y código<br>
-        <a href="https://huggingface.co/datajose" target="_blank" rel="noopener">huggingface.co/datajose</a><br>
-        © <span id="y">2026</span> · Chile
-      </div>
+    <div class="made"><span class="av"><span>JM</span></span><span>Diseñado y desarrollado por <strong>Jose Mora</strong> · <span id="yr">2026</span></span></div>
+    <div class="f-links">
+      <a href="https://huggingface.co/datajose" target="_blank" rel="noopener">Hugging Face ↗</a>
+      <a href="https://github.com/josemoragonzalez" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </div>
 </footer>
 
+<div class="preview" aria-hidden="true">
+  <img src="img/conflictos.svg" alt="">
+  <img src="img/alertas-ejecucion-presupuestaria.webp" alt="">
+  <img src="img/radar-municipal.webp" alt="">
+  <img src="img/radar-de-obras.webp" alt="">
+  <span class="chip">Abrir ↗</span>
+</div>
+<div class="wipe" aria-hidden="true"><span></span></div>
+
 <script>
-  document.getElementById('y').textContent = new Date().getFullYear();
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+document.getElementById('yr').textContent = new Date().getFullYear();
+if (fine) document.querySelector('.hint').textContent = 'Pasa el cursor · haz clic para entrar';
 
-  const fine = matchMedia('(pointer: fine)').matches;
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---------- nav turns solid after the hero ---------- */
+const nav = document.querySelector('nav');
+const onScroll = () => nav.classList.toggle('solid', scrollY > innerHeight * .6);
+addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
-  // cursor glow
-  const glow = document.querySelector('.cursor-glow');
-  if (fine) addEventListener('pointermove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
-  else glow.style.display = 'none';
+/* ---------- clock ---------- */
+const clock = document.getElementById('clock');
+const tick = () => clock.textContent = new Intl.DateTimeFormat('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' }).format(new Date());
+tick(); setInterval(tick, 15000);
 
-  // card spotlight + tilt
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('pointermove', e => {
-      const r = card.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      card.style.setProperty('--mx', x + 'px');
-      card.style.setProperty('--my', y + 'px');
-      if (fine && !still) {
-        const rx = ((y / r.height) - .5) * -6, ry = ((x / r.width) - .5) * 6;
-        card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-      }
+/* ---------- split headline into words ---------- */
+(() => {
+  const h = document.getElementById('title'); let i = 0;
+  const wrap = node => [...node.childNodes].forEach(n => {
+    if (n.nodeType !== 3) return wrap(n);
+    const frag = document.createDocumentFragment();
+    n.textContent.split(/(\s+)/).forEach(part => {
+      if (!part) return;
+      if (/^\s+$/.test(part)) return frag.append(' ');
+      const w = document.createElement('span'); w.className = 'w';
+      const s = document.createElement('span'); s.textContent = part; s.style.setProperty('--i', i++);
+      w.append(s); frag.append(w);
     });
-    card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+    n.replaceWith(frag);
   });
+  wrap(h);
+})();
 
-  // reveal on scroll
-  const io = new IntersectionObserver(entries => entries.forEach(en => {
-    if (en.isIntersecting) { const t = en.target; t.classList.add('in'); io.unobserve(t); setTimeout(() => t.style.transitionDelay = '', 1100); }
-  }), { threshold: .15 });
-  document.querySelectorAll('.card').forEach((c, i) => { c.style.transitionDelay = (i % 2) * 120 + 'ms'; io.observe(c); });
-  setTimeout(() => document.querySelectorAll('.card').forEach(c => c.classList.add('in')), 2500);
+/* ---------- WebGL flowing gradient ---------- */
+(() => {
+  const c = document.getElementById('gl');
+  const gl = c.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+  if (!gl) return;
+  const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
+  const fs = `
+    precision mediump float;
+    uniform vec2 R; uniform float T; uniform vec2 M; uniform float S;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+    float n(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+      return mix(mix(h(i),h(i+vec2(1,0)),u.x), mix(h(i+vec2(0,1)),h(i+vec2(1,1)),u.x), u.y); }
+    float fbm(vec2 p){ float v=0., a=.5; mat2 r=mat2(.8,.6,-.6,.8); for(int i=0;i<5;i++){ v+=a*n(p); p=r*p*2.02; a*=.5; } return v; }
+    void main(){
+      vec2 uv = gl_FragCoord.xy / R; vec2 p = uv; p.x *= R.x / R.y;
+      float t = T * .045;
+      vec2 m = (M - .5) * .6;
+      vec2 q = vec2(fbm(p*1.6 + t), fbm(p*1.6 + vec2(5.2,1.3) - t));
+      vec2 r = vec2(fbm(p*1.4 + 3.*q + vec2(1.7,9.2) + m + t*.7), fbm(p*1.4 + 3.*q + vec2(8.3,2.8) - m));
+      float f = fbm(p*1.2 + 2.5*r);
+      vec3 bg = vec3(.027,.027,.043);
+      vec3 vio = vec3(.42,.27,.86), cya = vec3(.09,.62,.72), cor = vec3(.85,.28,.42), amb = vec3(.9,.65,.2);
+      vec3 col = mix(bg, vio, smoothstep(.35,.95,f) * .9);
+      col = mix(col, cya, smoothstep(.45,1.,r.x) * .55);
+      col = mix(col, cor, smoothstep(.62,1.,q.y) * .35);
+      col = mix(col, amb, smoothstep(.8,1.,f*r.y*1.6) * .25);
+      col += vio * smoothstep(.5, 0., distance(uv, M)) * .12;     // soft light under the cursor
+      col *= mix(1., .35, S);                                       // darken as we scroll
+      col *= smoothstep(1.25, .25, length(uv - vec2(.45,.6)));      // vignette
+      gl_FragColor = vec4(col, 1.);
+    }`;
+  const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; };
+  const pr = gl.createProgram();
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const u = k => gl.getUniformLocation(pr, k);
+  const uR = u('R'), uT = u('T'), uM = u('M'), uS = u('S');
+  const scale = .5;  // soft gradient: render at half res and let CSS upscale
+  const size = () => { c.width = innerWidth * scale; c.height = innerHeight * scale; gl.viewport(0, 0, c.width, c.height); };
+  size(); addEventListener('resize', size);
+  const mouse = { x: .5, y: .6, tx: .5, ty: .6 };
+  addEventListener('pointermove', e => { mouse.tx = e.clientX / innerWidth; mouse.ty = 1 - e.clientY / innerHeight; });
+  const t0 = performance.now();
+  const frame = now => {
+    if (!document.hidden) {
+      mouse.x += (mouse.tx - mouse.x) * .04; mouse.y += (mouse.ty - mouse.y) * .04;
+      gl.uniform2f(uR, c.width, c.height);
+      gl.uniform1f(uT, (now - t0) / 1000 + 20);
+      gl.uniform2f(uM, mouse.x, mouse.y);
+      gl.uniform1f(uS, Math.min(scrollY / innerHeight, 1));
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    if (!still) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- cursor-trailing preview ---------- */
+(() => {
+  if (!fine) return;
+  const pv = document.querySelector('.preview');
+  const imgs = [...pv.querySelectorAll('img')];
+  const rows = document.querySelector('.rows');
+  let x = 0, y = 0, tx = 0, ty = 0, vx = 0, current = -1, running = false;
+  const loop = () => {
+    const nx = x + (tx - x) * .12, ny = y + (ty - y) * .12;
+    vx = vx * .8 + (nx - x) * .2; x = nx; y = ny;
+    const rot = Math.max(-10, Math.min(10, vx * .6));
+    pv.style.transform = `translate3d(${x - pv.offsetWidth / 2}px, ${y - pv.offsetHeight / 2}px, 0) rotate(${rot}deg)`;
+    if (running) requestAnimationFrame(loop);
+  };
+  addEventListener('pointermove', e => { tx = e.clientX + pv.offsetWidth / 2 + 36; ty = e.clientY; });
+  rows.querySelectorAll('a').forEach(a => a.addEventListener('pointerenter', () => {
+    const i = +a.dataset.img;
+    pv.style.setProperty('--accent', getComputedStyle(a.parentElement).getPropertyValue('--accent'));
+    imgs.forEach((im, k) => { im.classList.toggle('cur', k === i); im.classList.toggle('prev', current > -1 && k < i); });
+    current = i;
+    if (!running) { running = true; x = tx; y = ty; loop(); }
+    pv.classList.add('on');
+  }));
+  rows.addEventListener('pointerleave', () => {
+    pv.classList.remove('on');
+    setTimeout(() => {
+      if (pv.classList.contains('on')) return;
+      running = false; current = -1; imgs.forEach(im => im.classList.remove('cur', 'prev'));
+    }, 700);
+  });
+})();
+
+/* ---------- radial wipe, then navigate ---------- */
+(() => {
+  const wipe = document.querySelector('.wipe');
+  document.querySelectorAll('.rows a').forEach(a => a.addEventListener('click', e => {
+    if (still || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    wipe.style.setProperty('--accent', getComputedStyle(a.parentElement).getPropertyValue('--accent'));
+    wipe.style.setProperty('--x', e.clientX + 'px'); wipe.style.setProperty('--y', e.clientY + 'px');
+    wipe.querySelector('span').textContent = a.dataset.name;
+    wipe.classList.add('go');
+    setTimeout(() => location.href = a.href, 950);
+  }));
+  addEventListener('pageshow', () => wipe.classList.remove('go'));  // back button restores the page
+})();
+
+/* ---------- count-up stats ---------- */
+(() => {
+  const fmt = (v, d) => v.toLocaleString('es-CL', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const st = e.target; st.classList.add('seen'); io.unobserve(st);
+    const v = st.querySelector('.v'), to = +v.dataset.to, d = +(v.dataset.dec || 0);
+    const t0 = performance.now(), dur = still ? 0 : 1800;
+    const step = now => {
+      const k = dur ? Math.min((now - t0) / dur, 1) : 1;
+      v.firstChild.textContent = fmt(to * (1 - Math.pow(1 - k, 4)), d);
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }), { threshold: .4 });
+  document.querySelectorAll('.stat').forEach(s => io.observe(s));
+})();
 </script>
 </body>
 </html>
